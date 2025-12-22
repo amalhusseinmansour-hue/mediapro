@@ -81,3 +81,46 @@ logs/
 lib/screens/nul
 nul
 build/
+
+# Backend (separate repository)
+backend/
+
+# Store assets (not needed in repo)
+store_assets/
+
+# Build artifacts and APKs
+*.apk
+*.aab
+*.ipa
+
+# Archive files
+*.rar
+*.tar.gz
+*.zip
+*.7z
+backend-part-*
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Python scripts
+*.py
+
+# Large files
+*.exe
+*.msi
+
+# Node modules
+node_modules/
+
+# Other project folders
+web-app/
+website/
+download_page/
+cloudflare-ai-proxy/
+dashboard/
+
+# Claude settings
+.claude/

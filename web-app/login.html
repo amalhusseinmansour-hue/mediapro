@@ -1,162 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - ميديا برو</title>
-
-    <!-- Google Fonts - Noto Kufi Arabic -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Theme CSS -->
-    <link rel="stylesheet" href="css/theme.css">
-    <link rel="stylesheet" href="css/auth.css">
-</head>
-<body>
-    <!-- Animated Background -->
-    <div class="auth-bg">
-        <div class="neon-orb orb-cyan" style="width: 400px; height: 400px; top: -100px; right: -100px;"></div>
-        <div class="neon-orb orb-purple" style="width: 300px; height: 300px; bottom: -50px; left: 50%;"></div>
-        <div class="neon-orb orb-magenta" style="width: 350px; height: 350px; top: 50%; right: -150px;"></div>
-    </div>
-
-    <!-- Auth Container -->
-    <div class="auth-container">
-        <div class="auth-box">
-            <!-- Logo -->
-            <div class="auth-logo">
-                <div class="logo-icon">
-                    <i class="fas fa-bolt neon-text-cyan"></i>
-                </div>
-                <h1 class="gradient-text">ميديا برو</h1>
-                <p class="text-secondary">أدر وسائل التواصل بذكاء</p>
-            </div>
-
-            <!-- Auth Form -->
-            <div class="auth-form-wrapper">
-                <h2 class="auth-title">مرحباً بعودتك 👋</h2>
-                <p class="auth-subtitle">سجّل دخولك للوصول إلى لوحة التحكم</p>
-
-                <!-- Social Login -->
-                <div class="social-login">
-                    <button class="social-btn">
-                        <i class="fab fa-google"></i>
-                        <span>تسجيل الدخول بـ Google</span>
-                    </button>
-                    <button class="social-btn">
-                        <i class="fab fa-facebook"></i>
-                        <span>تسجيل الدخول بـ Facebook</span>
-                    </button>
-                </div>
-
-                <div class="divider">
-                    <span>أو استخدم البريد الإلكتروني</span>
-                </div>
-
-                <!-- Login Form -->
-                <form id="loginForm" class="auth-form">
-                    <div class="alert alert-error" id="errorAlert" style="display: none;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span id="errorMessage">حدث خطأ ما</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">البريد الإلكتروني</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-envelope"></i>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                class="form-input"
-                                placeholder="name@example.com"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">كلمة المرور</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-lock"></i>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                class="form-input"
-                                placeholder="أدخل كلمة المرور"
-                                required
-                            >
-                            <button type="button" class="toggle-password" onclick="togglePassword()">
-                                <i class="fas fa-eye" id="toggleIcon"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-options">
-                        <label class="checkbox-wrapper">
-                            <input type="checkbox" name="remember" id="remember">
-                            <span>تذكرني</span>
-                        </label>
-                        <a href="forgot-password.html" class="forgot-link neon-text-cyan">نسيت كلمة المرور؟</a>
-                    </div>
-
-                    <button type="submit" class="btn btn-neon btn-block btn-large">
-                        <span>تسجيل الدخول</span>
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-
-                    <div class="auth-footer">
-                        <p>ليس لديك حساب؟ <a href="register.html" class="neon-text-cyan">إنشاء حساب جديد</a></p>
-                    </div>
-                </form>
-
-                <!-- Security Badge -->
-                <div class="security-badge">
-                    <i class="fas fa-shield-alt neon-text-cyan"></i>
-                    <span>تسجيل دخول آمن ومشفر 256-bit</span>
-                </div>
-            </div>
-
-            <!-- Features -->
-            <div class="auth-features">
-                <div class="feature-item">
-                    <i class="fas fa-rocket neon-text-cyan"></i>
-                    <div>
-                        <h4>جدولة ذكية</h4>
-                        <p>وفّر الوقت وزِد التفاعل</p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-chart-line neon-text-purple"></i>
-                    <div>
-                        <h4>تحليلات متقدمة</h4>
-                        <p>قرارات مبنية على البيانات</p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <i class="fas fa-robot neon-text-magenta"></i>
-                    <div>
-                        <h4>ذكاء اصطناعي</h4>
-                        <p>محتوى احترافي بنقرة واحدة</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
-        <div class="spinner"></div>
-        <p class="neon-text-cyan">جاري تسجيل الدخول...</p>
-    </div>
-
-    <!-- Scripts -->
-    <script src="js/auth.js"></script>
-</body>
-</html>
