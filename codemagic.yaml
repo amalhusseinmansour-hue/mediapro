@@ -4,13 +4,15 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
 
+    integrations:
+      app_store_connect: Codemagic
+
     environment:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.mediapro.socialmediamanager
       vars:
         BUNDLE_ID: "com.mediapro.socialmediamanager"
-        APP_STORE_APP_ID: "YOUR_APP_STORE_APP_ID"
       flutter: stable
       xcode: latest
       cocoapods: default
@@ -32,7 +34,7 @@ workflows:
         script: |
           flutter build ipa --release \
             --build-name=1.0.0 \
-            --build-number=$(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APP_ID") + 1)) \
+            --build-number=$PROJECT_BUILD_NUMBER \
             --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
@@ -60,8 +62,6 @@ workflows:
     environment:
       android_signing:
         - mediapro_keystore
-      groups:
-        - google_play
       vars:
         BUNDLE_ID: "com.socialmedia.social_media_manager"
       flutter: stable
