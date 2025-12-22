@@ -1,0 +1,4 @@
+cd domains/mediaprosocial.io/
+put backend.tar.gz
+ls -l
+bye

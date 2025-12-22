@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+
+@config "./tailwind.config.js";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Login Page Styling */
+.fi-simple-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    min-height: 100vh;
+}
+
+.fi-simple-page .fi-simple-main-ctn {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    backdrop-filter: blur(10px);
+}
+
+/* Modern Card Style */
+.fi-section {
+    border-radius: 15px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    transition: all 0.3s ease;
+}
+
+.fi-section:hover {
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.15) !important;
+    transform: translateY(-2px);
+}
+
+/* Beautiful Buttons */
+.fi-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+}
+
+.fi-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+}
+
+/* Input Fields */
+.fi-input {
+    border-radius: 10px !important;
+    border: 2px solid #e5e7eb !important;
+    padding: 12px 16px !important;
+    transition: all 0.3s ease !important;
+}
+
+.fi-input:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Tables */
+.fi-ta-table {
+    border-radius: 15px !important;
+    overflow: hidden;
+}
+
+.fi-ta-header-cell {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    font-weight: 700 !important;
+    color: #667eea !important;
+}
+
+.fi-ta-row:hover {
+    background: rgba(102, 126, 234, 0.05) !important;
+}
+
+/* Sidebar */
+.fi-sidebar {
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
+    border-right: 1px solid #e5e7eb;
+}
+
+.fi-sidebar-nav-item {
+    border-radius: 10px !important;
+    margin: 4px 8px !important;
+    transition: all 0.3s ease !important;
+}
+
+.fi-sidebar-nav-item:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+    transform: translateX(5px);
+}
+
+.fi-sidebar-nav-item-active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* Dashboard Widgets */
+.fi-wi-stats-overview-stat {
+    border-radius: 15px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.3s ease !important;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* Badges */
+.fi-badge {
+    border-radius: 20px !important;
+    padding: 6px 12px !important;
+    font-weight: 600 !important;
+}
+
+/* Modal */
+.fi-modal {
+    border-radius: 20px !important;
+    overflow: hidden;
+}
+
+.fi-modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    padding: 24px !important;
+}
+
+/* Notifications */
+.fi-no-notification {
+    border-radius: 15px !important;
+    border-left: 4px solid #667eea !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Custom Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fi-section,
+.fi-ta-table,
+.fi-wi-stats-overview-stat {
+    animation: slideIn 0.5s ease-out;
+}
+
+/* RTL Support */
+[dir="rtl"] .fi-sidebar-nav-item:hover {
+    transform: translateX(-5px);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .fi-simple-page {
+        background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%) !important;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .fi-simple-page .fi-simple-main-ctn {
+        padding: 24px;
+        margin: 16px;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Loading States */
+.fi-spinner {
+    border-top-color: #667eea !important;
+}
+
+/* Action Buttons */
+.fi-ta-actions button {
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-ta-actions button:hover {
+    transform: scale(1.05);
+}
+
+/* Form Sections */
+.fi-fo-section-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    border-radius: 10px !important;
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+}
+
+/* Success Messages */
+.fi-no-notification-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+    border-left-color: #10b981 !important;
+}
+
+/* Error Messages */
+.fi-no-notification-danger {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+    border-left-color: #ef4444 !important;
+}
+
+/* Info Messages */
+.fi-no-notification-info {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+    border-left-color: #3b82f6 !important;
+}

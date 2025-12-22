@@ -1,0 +1,219 @@
+{
+  "name": "Generate AI Content",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-content",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "generate-content"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract data from webhook\nconst prompt = $json.body.prompt || '';\nconst type = $json.body.type || 'image'; // 'image' or 'video'\nconst options = $json.body.options || {};\nconst userId = $json.body.user_id || null;\n\nreturn {\n  json: {\n    prompt,\n    type,\n    options,\n    user_id: userId,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Process Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.type}}",
+              "operation": "equals",
+              "value2": "image"
+            }
+          ]
+        }
+      },
+      "name": "Check Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.KIE_AI_API_URL || 'https://api.kie.ai/v1'}}/generate/image",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "={{\"Bearer \" + ($env.KIE_AI_API_KEY || '')}}"
+            },
+            {
+              "name": "X-Secret-Key",
+              "value": "={{$env.KIE_AI_SECRET_KEY || ''}}"
+            }
+          ]
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "prompt",
+              "value": "={{$json.prompt}}"
+            },
+            {
+              "name": "size",
+              "value": "={{$json.options.size || '1024x1024'}}"
+            },
+            {
+              "name": "quality",
+              "value": "={{$json.options.quality || 'hd'}}"
+            },
+            {
+              "name": "style",
+              "value": "={{$json.options.style || 'vivid'}}"
+            }
+          ]
+        }
+      },
+      "name": "Generate Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.KIE_AI_API_URL || 'https://api.kie.ai/v1'}}/generate/video",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "={{\"Bearer \" + ($env.KIE_AI_API_KEY || '')}}"
+            },
+            {
+              "name": "X-Secret-Key",
+              "value": "={{$env.KIE_AI_SECRET_KEY || ''}}"
+            }
+          ]
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "prompt",
+              "value": "={{$json.prompt}}"
+            },
+            {
+              "name": "duration",
+              "value": "={{$json.options.duration || 5}}"
+            },
+            {
+              "name": "resolution",
+              "value": "={{$json.options.resolution || '1080p'}}"
+            },
+            {
+              "name": "aspect_ratio",
+              "value": "={{$json.options.aspect_ratio || '16:9'}}"
+            }
+          ]
+        }
+      },
+      "name": "Generate Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Format the response\nconst response = $json;\nconst type = $node[\"Process Request\"].json.type;\nconst prompt = $node[\"Process Request\"].json.prompt;\n\nif (response.data) {\n  return {\n    json: {\n      success: true,\n      type: type,\n      prompt: prompt,\n      content_url: type === 'image' \n        ? (response.data.images ? response.data.images[0] : null)\n        : response.data.video_url,\n      credits_used: response.data.credits_used || 0,\n      generated_at: new Date().toISOString()\n    }\n  };\n} else {\n  return {\n    json: {\n      success: false,\n      message: 'Failed to generate content',\n      error: response.message || 'Unknown error'\n    }\n  };\n}"
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.LARAVEL_API_URL || 'https://mediaprosocial.io'}}/api/webhooks/n8n/content-generated",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "user_id",
+              "value": "={{$node[\"Process Request\"].json.user_id}}"
+            },
+            {
+              "name": "type",
+              "value": "={{$json.type}}"
+            },
+            {
+              "name": "content_url",
+              "value": "={{$json.content_url}}"
+            },
+            {
+              "name": "prompt",
+              "value": "={{$json.prompt}}"
+            },
+            {
+              "name": "success",
+              "value": "={{$json.success}}"
+            }
+          ]
+        }
+      },
+      "name": "Notify Laravel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json)}}"
+      },
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Process Request", "type": "main", "index": 0}]]
+    },
+    "Process Request": {
+      "main": [[{"node": "Check Type", "type": "main", "index": 0}]]
+    },
+    "Check Type": {
+      "main": [
+        [{"node": "Generate Image", "type": "main", "index": 0}],
+        [{"node": "Generate Video", "type": "main", "index": 0}]
+      ]
+    },
+    "Generate Image": {
+      "main": [[{"node": "Format Response", "type": "main", "index": 0}]]
+    },
+    "Generate Video": {
+      "main": [[{"node": "Format Response", "type": "main", "index": 0}]]
+    },
+    "Format Response": {
+      "main": [[{"node": "Notify Laravel", "type": "main", "index": 0}]]
+    },
+    "Notify Laravel": {
+      "main": [[{"node": "Response", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-19T00:00:00.000Z",
+  "versionId": "1"
+}

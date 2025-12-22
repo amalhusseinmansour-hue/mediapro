@@ -1,0 +1,133 @@
+{
+  "name": "Auto Post to Social Media",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auto-post",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "auto-post"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract data from webhook\nconst content = $json.body.content || '';\nconst platforms = $json.body.platforms || [];\nconst media = $json.body.media || [];\nconst scheduleTime = $json.body.schedule_time || null;\nconst userId = $json.body.user_id || null;\n\n// Prepare post data\nreturn {\n  json: {\n    content,\n    platforms,\n    media,\n    schedule_time: scheduleTime,\n    user_id: userId,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Process Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.UPLOAD_POST_API_URL || 'https://api.upload-post.com/api'}}/upload_text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "={{\"Apikey \" + ($env.UPLOAD_POST_API_KEY || '')}}"
+            }
+          ]
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "text",
+              "value": "={{$json.content}}"
+            },
+            {
+              "name": "platforms",
+              "value": "={{$json.platforms}}"
+            },
+            {
+              "name": "schedule_time",
+              "value": "={{$json.schedule_time}}"
+            }
+          ]
+        }
+      },
+      "name": "Upload to Social Media",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Check if posting was successful\nconst response = $json;\nconst success = response.success || false;\n\nif (success) {\n  return {\n    json: {\n      success: true,\n      message: 'Post published successfully',\n      data: response.data || {},\n      posted_at: new Date().toISOString()\n    }\n  };\n} else {\n  return {\n    json: {\n      success: false,\n      message: response.message || 'Failed to publish post',\n      error: response.error || 'Unknown error'\n    }\n  };\n}"
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.LARAVEL_API_URL || 'https://mediaprosocial.io'}}/api/webhooks/n8n/post-status",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "user_id",
+              "value": "={{$node[\"Process Data\"].json.user_id}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$json.success ? 'success' : 'failed'}}"
+            },
+            {
+              "name": "data",
+              "value": "={{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      },
+      "name": "Notify Laravel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json)}}"
+      },
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Process Data", "type": "main", "index": 0}]]
+    },
+    "Process Data": {
+      "main": [[{"node": "Upload to Social Media", "type": "main", "index": 0}]]
+    },
+    "Upload to Social Media": {
+      "main": [[{"node": "Format Response", "type": "main", "index": 0}]]
+    },
+    "Format Response": {
+      "main": [[{"node": "Notify Laravel", "type": "main", "index": 0}]]
+    },
+    "Notify Laravel": {
+      "main": [[{"node": "Response", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-19T00:00:00.000Z",
+  "versionId": "1"
+}

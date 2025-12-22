@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git remote add:*)",
+      "Bash(git add:*)",
+      "Bash(if exist nul del nul)",
+      "Bash(rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)",
+      "Bash(git push:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(php artisan config:clear:*)",
+      "Bash(php create_admin.php:*)",
+      "Bash(php artisan tinker:*)",
+      "Bash(php:*)",
+      "Bash(sshpass -p 'gtWD8vyZBXT7qv$' ssh -p 65002 -o StrictHostKeyChecking=no u126213189@82.25.83.217 \"pwd && ls -la\")",
+      "Bash(ssh -p 65002 -o StrictHostKeyChecking=no -o ConnectTimeout=10 u126213189@82.25.83.217 \"echo ''gtWD8vyZBXT7qv$'' && pwd && ls -la\")",
+      "Bash(ssh:*)",
+      "Bash(sshpass -p \"gtWD8vyZBXT7qv$\" ssh -p 65002 -o StrictHostKeyChecking=no u126213189@82.25.83.217 \"pwd\")",
+      "Bash(C:UsersHPsocial_media_managerbackendrun_fix_on_server.bat)",
+      "Bash(cmd /c run_fix_on_server.bat)",
+      "Bash(flutter run:*)",
+      "Bash(flutter clean:*)",
+      "Bash(sshpass -p \"gtWD8vyZBXT7qv$\" scp -P 65002 -o StrictHostKeyChecking=no \"C:\\Users\\HP\\social_media_manager\\backend\\app\\Http\\Controllers\\Api\\AuthController.php\" u126213189@82.25.83.217:/home/u126213189/domains/mediaprosocial.io/public_html/app/Http/Controllers/Api/)",
+      "Bash(cmd /c upload_auth_controller.bat)",
+      "Bash(dir /s /b appFilamentPages*.php)",
+      "Bash(md5sum:*)",
+      "Bash(cat:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(sshpass -p \"gtWD8vyZBXT7qv$\" scp -P 65002 -o StrictHostKeyChecking=no insert_admin.php u126213189@82.25.83.217:/home/u126213189/domains/mediaprosocial.io/public_html/)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

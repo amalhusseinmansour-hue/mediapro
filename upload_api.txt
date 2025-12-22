@@ -1,0 +1,1 @@
+put C:\Users\HP\social_media_manager\backend\routes\api.php /home/u126213189/domains/mediaprosocial.io/public_html/routes/api.php

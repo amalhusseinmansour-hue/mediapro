@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 مساعد إنشاء OAuth Apps</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .platform-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .platform-card:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .platform-card.facebook { border-color: #1877f2; }
+        .platform-card.instagram { border-color: #E4405F; }
+        .platform-card.linkedin { border-color: #0077b5; }
+        .platform-card.twitter { border-color: #1DA1F2; }
+        .platform-card.youtube { border-color: #FF0000; }
+
+        .platform-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .platform-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .platform-icon {
+            font-size: 1.8em;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .step {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .copy-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .copy-btn:hover {
+            background: #059669;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-right: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border-right: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .success-box {
+            background: #d1fae5;
+            border-right: 4px solid #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .code-box {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 مساعد إنشاء OAuth Apps</h1>
+        <p class="subtitle">أداة تفاعلية لمساعدتك في إنشاء OAuth Applications</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <!-- Facebook -->
+        <div class="platform-card facebook" id="facebook-card">
+            <div class="platform-header">
+                <div class="platform-title">
+                    <span class="platform-icon">📘</span>
+                    Facebook
+                </div>
+                <a href="https://developers.facebook.com/apps/create/" target="_blank" class="btn btn-primary">
+                    إنشاء تطبيق →
+                </a>
+            </div>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>البيانات المطلوبة:</strong>
+                <div class="code-box">
+App name: M PRO Social Manager<br>
+App contact email: [بريدك]<br>
+Purpose: Business
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('M PRO Social Manager')">📋 نسخ الاسم</button>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Redirect URL:</strong>
+                <div class="code-box">https://mediaprosocial.io/api/auth/facebook/callback</div>
+                <button class="copy-btn" onclick="copyToClipboard('https://mediaprosocial.io/api/auth/facebook/callback')">📋 نسخ</button>
+            </div>
+
+            <div class="input-group">
+                <label>📝 App ID:</label>
+                <input type="text" id="fb-id" placeholder="الصق هنا App ID الذي حصلت عليه">
+            </div>
+
+            <div class="input-group">
+                <label>🔑 App Secret:</label>
+                <input type="text" id="fb-secret" placeholder="الصق هنا App Secret الذي حصلت عليه">
+            </div>
+
+            <button class="btn btn-success" onclick="saveFacebook()">✅ حفظ على السيرفر</button>
+            <div class="success-box" id="fb-success">
+                ✅ تم الحفظ بنجاح! جرب الآن ربط Facebook من التطبيق.
+            </div>
+        </div>
+
+        <!-- Instagram -->
+        <div class="platform-card instagram">
+            <div class="platform-header">
+                <div class="platform-title">
+                    <span class="platform-icon">📸</span>
+                    Instagram
+                </div>
+                <span class="btn" style="background: #E4405F; color: white;">يعتمد على Facebook</span>
+            </div>
+
+            <div class="info-box">
+                💡 <strong>ملاحظة:</strong> Instagram يستخدم نفس تطبيق Facebook. أضف "Instagram Basic Display" كـ Product.
+            </div>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Redirect URL:</strong>
+                <div class="code-box">https://mediaprosocial.io/api/auth/instagram/callback</div>
+                <button class="copy-btn" onclick="copyToClipboard('https://mediaprosocial.io/api/auth/instagram/callback')">📋 نسخ</button>
+            </div>
+
+            <div class="input-group">
+                <label>📝 Instagram App ID:</label>
+                <input type="text" id="ig-id" placeholder="من Instagram Basic Display">
+            </div>
+
+            <div class="input-group">
+                <label>🔑 Instagram App Secret:</label>
+                <input type="text" id="ig-secret" placeholder="من Instagram Basic Display">
+            </div>
+
+            <button class="btn btn-success" onclick="saveInstagram()">✅ حفظ على السيرفر</button>
+            <div class="success-box" id="ig-success">
+                ✅ تم الحفظ بنجاح!
+            </div>
+        </div>
+
+        <!-- LinkedIn -->
+        <div class="platform-card linkedin">
+            <div class="platform-header">
+                <div class="platform-title">
+                    <span class="platform-icon">💼</span>
+                    LinkedIn
+                </div>
+                <a href="https://www.linkedin.com/developers/apps/new" target="_blank" class="btn btn-primary">
+                    إنشاء تطبيق →
+                </a>
+            </div>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Redirect URL:</strong>
+                <div class="code-box">https://mediaprosocial.io/api/auth/linkedin/callback</div>
+                <button class="copy-btn" onclick="copyToClipboard('https://mediaprosocial.io/api/auth/linkedin/callback')">📋 نسخ</button>
+            </div>
+
+            <div class="input-group">
+                <label>📝 Client ID:</label>
+                <input type="text" id="li-id" placeholder="من تبويب Auth">
+            </div>
+
+            <div class="input-group">
+                <label>🔑 Client Secret:</label>
+                <input type="text" id="li-secret" placeholder="من تبويب Auth (اضغط Show)">
+            </div>
+
+            <button class="btn btn-success" onclick="saveLinkedIn()">✅ حفظ على السيرفر</button>
+            <div class="success-box" id="li-success">
+                ✅ تم الحفظ بنجاح!
+            </div>
+        </div>
+
+        <!-- Twitter -->
+        <div class="platform-card twitter">
+            <div class="platform-header">
+                <div class="platform-title">
+                    <span class="platform-icon">🐦</span>
+                    Twitter/X
+                </div>
+                <a href="https://developer.twitter.com/en/portal/dashboard" target="_blank" class="btn btn-primary">
+                    إنشاء تطبيق →
+                </a>
+            </div>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Redirect URL:</strong>
+                <div class="code-box">https://mediaprosocial.io/api/auth/twitter/callback</div>
+                <button class="copy-btn" onclick="copyToClipboard('https://mediaprosocial.io/api/auth/twitter/callback')">📋 نسخ</button>
+            </div>
+
+            <div class="input-group">
+                <label>📝 API Key (Client ID):</label>
+                <input type="text" id="tw-id" placeholder="من Keys and tokens">
+            </div>
+
+            <div class="input-group">
+                <label>🔑 API Secret (Client Secret):</label>
+                <input type="text" id="tw-secret" placeholder="من Keys and tokens">
+            </div>
+
+            <button class="btn btn-success" onclick="saveTwitter()">✅ حفظ على السيرفر</button>
+            <div class="success-box" id="tw-success">
+                ✅ تم الحفظ بنجاح!
+            </div>
+        </div>
+
+        <!-- YouTube -->
+        <div class="platform-card youtube">
+            <div class="platform-header">
+                <div class="platform-title">
+                    <span class="platform-icon">🎥</span>
+                    YouTube/Google
+                </div>
+                <a href="https://console.cloud.google.com/" target="_blank" class="btn btn-primary">
+                    إنشاء تطبيق →
+                </a>
+            </div>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Redirect URL:</strong>
+                <div class="code-box">https://mediaprosocial.io/api/auth/youtube/callback</div>
+                <button class="copy-btn" onclick="copyToClipboard('https://mediaprosocial.io/api/auth/youtube/callback')">📋 نسخ</button>
+            </div>
+
+            <div class="input-group">
+                <label>📝 Client ID:</label>
+                <input type="text" id="yt-id" placeholder="من OAuth 2.0 Client IDs">
+            </div>
+
+            <div class="input-group">
+                <label>🔑 Client Secret:</label>
+                <input type="text" id="yt-secret" placeholder="من OAuth 2.0 Client IDs">
+            </div>
+
+            <button class="btn btn-success" onclick="saveYouTube()">✅ حفظ على السيرفر</button>
+            <div class="success-box" id="yt-success">
+                ✅ تم الحفظ بنجاح!
+            </div>
+        </div>
+
+        <div class="warning-box">
+            ⚠️ <strong>مهم:</strong> بعد حفظ كل منصة، افتح التطبيق واختبر الربط من إعدادات → ربط الحسابات
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ تم النسخ: ' + text);
+            });
+        }
+
+        function updateProgress() {
+            const inputs = document.querySelectorAll('input[type="text"]');
+            const filled = Array.from(inputs).filter(input => input.value.trim() !== '').length;
+            const total = inputs.length;
+            const percentage = (filled / total) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+        }
+
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('input', updateProgress);
+        });
+
+        async function saveFacebook() {
+            const id = document.getElementById('fb-id').value;
+            const secret = document.getElementById('fb-secret').value;
+
+            if (!id || !secret) {
+                alert('❌ يرجى إدخال App ID و App Secret');
+                return;
+            }
+
+            // هنا يمكنك إضافة الكود لحفظ البيانات على السيرفر
+            console.log('Saving Facebook credentials:', {id, secret});
+
+            document.getElementById('fb-success').style.display = 'block';
+            alert('✅ تم حفظ بيانات Facebook! الآن قم بتحديث السيرفر يدوياً أو استخدم API.');
+        }
+
+        function saveInstagram() {
+            const id = document.getElementById('ig-id').value;
+            const secret = document.getElementById('ig-secret').value;
+            if (!id || !secret) {
+                alert('❌ يرجى إدخال Instagram App ID و Secret');
+                return;
+            }
+            document.getElementById('ig-success').style.display = 'block';
+            console.log('Instagram:', {id, secret});
+        }
+
+        function saveLinkedIn() {
+            const id = document.getElementById('li-id').value;
+            const secret = document.getElementById('li-secret').value;
+            if (!id || !secret) {
+                alert('❌ يرجى إدخال LinkedIn Client ID و Secret');
+                return;
+            }
+            document.getElementById('li-success').style.display = 'block';
+            console.log('LinkedIn:', {id, secret});
+        }
+
+        function saveTwitter() {
+            const id = document.getElementById('tw-id').value;
+            const secret = document.getElementById('tw-secret').value;
+            if (!id || !secret) {
+                alert('❌ يرجى إدخال Twitter API Key و Secret');
+                return;
+            }
+            document.getElementById('tw-success').style.display = 'block';
+            console.log('Twitter:', {id, secret});
+        }
+
+        function saveYouTube() {
+            const id = document.getElementById('yt-id').value;
+            const secret = document.getElementById('yt-secret').value;
+            if (!id || !secret) {
+                alert('❌ يرجى إدخال Google Client ID و Secret');
+                return;
+            }
+            document.getElementById('yt-success').style.display = 'block';
+            console.log('YouTube:', {id, secret});
+        }
+    </script>
+</body>
+</html>

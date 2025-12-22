@@ -1,0 +1,259 @@
+{
+  "name": "Full Automation - Generate & Post",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "full-automation",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 400],
+      "webhookId": "full-automation"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract data from webhook\nconst topic = $json.body.topic || '';\nconst platforms = $json.body.platforms || [];\nconst contentType = $json.body.content_type || 'image';\nconst scheduleTime = $json.body.schedule_time || null;\nconst userId = $json.body.user_id || null;\nconst options = $json.body.options || {};\n\nreturn {\n  json: {\n    topic,\n    platforms,\n    content_type: contentType,\n    schedule_time: scheduleTime,\n    user_id: userId,\n    options,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Process Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Create a detailed prompt for AI content generation\nconst topic = $json.topic;\nconst contentType = $json.content_type;\n\nlet prompt = '';\n\nif (contentType === 'image') {\n  prompt = `Create a professional and engaging social media image about: ${topic}. ` +\n    'Make it eye-catching, modern, and suitable for social media platforms. ' +\n    'Use vibrant colors and clear typography.';\n} else if (contentType === 'video') {\n  prompt = `Create a short, engaging video about: ${topic}. ` +\n    'Make it dynamic, professional, and attention-grabbing. ' +\n    'Suitable for social media platforms like Instagram, TikTok, and Facebook.';\n}\n\nreturn {\n  json: {\n    ...$json,\n    ai_prompt: prompt\n  }\n};"
+      },
+      "name": "Create AI Prompt",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.KIE_AI_API_URL || 'https://api.kie.ai/v1'}}/generate/{{$json.content_type}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "={{\"Bearer \" + ($env.KIE_AI_API_KEY || '')}}"
+            },
+            {
+              "name": "X-Secret-Key",
+              "value": "={{$env.KIE_AI_SECRET_KEY || ''}}"
+            }
+          ]
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "prompt",
+              "value": "={{$json.ai_prompt}}"
+            },
+            {
+              "name": "size",
+              "value": "1024x1024"
+            },
+            {
+              "name": "quality",
+              "value": "hd"
+            }
+          ]
+        }
+      },
+      "name": "Generate Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract generated content URL\nconst response = $json;\nconst contentType = $node[\"Create AI Prompt\"].json.content_type;\nconst originalData = $node[\"Create AI Prompt\"].json;\n\nlet contentUrl = null;\n\nif (response.data) {\n  if (contentType === 'image' && response.data.images) {\n    contentUrl = response.data.images[0];\n  } else if (contentType === 'video') {\n    contentUrl = response.data.video_url;\n  }\n}\n\nreturn {\n  json: {\n    ...originalData,\n    content_url: contentUrl,\n    ai_response: response\n  }\n};"
+      },
+      "name": "Extract Content URL",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1050, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Generate caption for the post\nconst topic = $json.topic;\nconst platforms = $json.platforms;\n\n// Create engaging caption\nlet caption = `🎯 ${topic}\\n\\n`;\ncaption += '✨ Discover more insights and stay updated!\\n\\n';\n\n// Add platform-specific hashtags\nconst hashtags = topic\n  .split(' ')\n  .filter(word => word.length > 3)\n  .slice(0, 3)\n  .map(word => '#' + word.replace(/[^a-zA-Z0-9]/g, ''))\n  .join(' ');\n\ncaption += hashtags + ' #SocialMedia #Content';\n\nreturn {\n  json: {\n    ...$json,\n    caption: caption\n  }\n};"
+      },
+      "name": "Generate Caption",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1250, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.content_url}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "name": "Check Content Generated",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1450, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.UPLOAD_POST_API_URL || 'https://api.upload-post.com/api'}}/upload_photos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {},
+        "headerParametersUi": {
+          "parameter": [
+            {
+              "name": "Authorization",
+              "value": "={{\"Apikey \" + ($env.UPLOAD_POST_API_KEY || '')}}"
+            }
+          ]
+        },
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "caption",
+              "value": "={{$json.caption}}"
+            },
+            {
+              "name": "platforms",
+              "value": "={{$json.platforms}}"
+            },
+            {
+              "name": "image_url",
+              "value": "={{$json.content_url}}"
+            },
+            {
+              "name": "schedule_time",
+              "value": "={{$json.schedule_time}}"
+            }
+          ]
+        }
+      },
+      "name": "Post to Social Media",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Format success response\nconst postResponse = $json;\nconst originalData = $node[\"Generate Caption\"].json;\n\nreturn {\n  json: {\n    success: true,\n    message: 'Content generated and posted successfully',\n    topic: originalData.topic,\n    platforms: originalData.platforms,\n    content_type: originalData.content_type,\n    content_url: originalData.content_url,\n    caption: originalData.caption,\n    post_response: postResponse,\n    completed_at: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Format Success",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Format error response\nconst originalData = $node[\"Generate Caption\"].json;\n\nreturn {\n  json: {\n    success: false,\n    message: 'Failed to generate content',\n    topic: originalData.topic,\n    error: 'Content generation failed or returned empty',\n    failed_at: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Format Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1650, 500]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll"
+      },
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [2050, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.LARAVEL_API_URL || 'https://mediaprosocial.io'}}/api/webhooks/n8n/automation-complete",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "user_id",
+              "value": "={{$node[\"Process Request\"].json.user_id}}"
+            },
+            {
+              "name": "result",
+              "value": "={{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      },
+      "name": "Notify Laravel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2250, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json)}}"
+      },
+      "name": "Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2450, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Process Request", "type": "main", "index": 0}]]
+    },
+    "Process Request": {
+      "main": [[{"node": "Create AI Prompt", "type": "main", "index": 0}]]
+    },
+    "Create AI Prompt": {
+      "main": [[{"node": "Generate Content", "type": "main", "index": 0}]]
+    },
+    "Generate Content": {
+      "main": [[{"node": "Extract Content URL", "type": "main", "index": 0}]]
+    },
+    "Extract Content URL": {
+      "main": [[{"node": "Generate Caption", "type": "main", "index": 0}]]
+    },
+    "Generate Caption": {
+      "main": [[{"node": "Check Content Generated", "type": "main", "index": 0}]]
+    },
+    "Check Content Generated": {
+      "main": [
+        [{"node": "Post to Social Media", "type": "main", "index": 0}],
+        [{"node": "Format Error", "type": "main", "index": 0}]
+      ]
+    },
+    "Post to Social Media": {
+      "main": [[{"node": "Format Success", "type": "main", "index": 0}]]
+    },
+    "Format Success": {
+      "main": [[{"node": "Merge Results", "type": "main", "index": 0}]]
+    },
+    "Format Error": {
+      "main": [[{"node": "Merge Results", "type": "main", "index": 1}]]
+    },
+    "Merge Results": {
+      "main": [[{"node": "Notify Laravel", "type": "main", "index": 0}]]
+    },
+    "Notify Laravel": {
+      "main": [[{"node": "Response", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-19T00:00:00.000Z",
+  "versionId": "1"
+}

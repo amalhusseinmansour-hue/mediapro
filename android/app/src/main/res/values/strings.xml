@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">MEDIA PRO</string>
+
+    <!-- Facebook App ID Configuration -->
+    <string name="facebook_app_id">1925148181364576</string>
+    <string name="fb_login_protocol_scheme">fb1925148181364576</string>
+    <string name="facebook_client_token">77b9f6e47b68460adb8de1017ac793fb</string>
+
+    <!--
+    Facebook Settings:
+    - App ID: 1925148181364576
+    - Key Hash: A7xFcO70PsZAHChuG6AujZHe0mk=
+    - Package Name: com.socialmedia.social_media_manager
+    - Main Activity: com.socialmedia.social_media_manager.MainActivity
+    -->
+</resources>

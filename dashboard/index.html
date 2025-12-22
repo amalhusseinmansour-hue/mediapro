@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - ميديا برو</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h1>ميديا برو</h1>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item active">
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>الرئيسية</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="posts.html" class="nav-link">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>جدولة المنشورات</span>
+                        <span class="badge">24</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="analytics.html" class="nav-link">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>التحليلات</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="accounts.html" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>الحسابات المتصلة</span>
+                        <span class="badge success">8</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="inbox.html" class="nav-link">
+                        <i class="fas fa-inbox"></i>
+                        <span>صندوق الوارد</span>
+                        <span class="badge error">5</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="media.html" class="nav-link">
+                        <i class="fas fa-images"></i>
+                        <span>مكتبة الوسائط</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="ai-tools.html" class="nav-link">
+                        <i class="fas fa-robot"></i>
+                        <span>أدوات الذكاء الاصطناعي</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="nav-divider"></div>
+
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="settings.html" class="nav-link">
+                        <i class="fas fa-cog"></i>
+                        <span>الإعدادات</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="window.authUtils.logout(); return false;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>تسجيل الخروج</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="upgrade-card">
+                <div class="upgrade-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h3>ترقية إلى Pro</h3>
+                <p>احصل على ميزات متقدمة وأكثر</p>
+                <button class="btn btn-upgrade">ترقية الآن</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="mobile-toggle" id="mobileToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="البحث في المنشورات، الحسابات...">
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button class="header-icon-btn" title="إنشاء منشور جديد">
+                    <i class="fas fa-plus"></i>
+                </button>
+
+                <button class="header-icon-btn" title="الإشعارات">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+
+                <div class="user-menu">
+                    <button class="user-menu-btn" id="userMenuBtn">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name" id="userName">جاري التحميل...</span>
+                            <span class="user-plan">خطة مجانية</span>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="profile.html" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>الملف الشخصي</span>
+                        </a>
+                        <a href="billing.html" class="dropdown-item">
+                            <i class="fas fa-credit-card"></i>
+                            <span>الفواتير والاشتراك</span>
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>الإعدادات</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" onclick="window.authUtils.logout(); return false;">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>تسجيل الخروج</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">مرحباً، <span id="userNameMain">...</span> 👋</h1>
+                    <p class="page-subtitle">إليك نظرة عامة على أداء حساباتك اليوم</p>
+                </div>
+                <button class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    <span>منشور جديد</span>
+                </button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-title">المنشورات المجدولة</h3>
+                        <div class="stat-value">24</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>12% عن الأسبوع الماضي</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-title">إجمالي المتابعين</h3>
+                        <div class="stat-value">45.2K</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>8.5% عن الأسبوع الماضي</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-title">معدل التفاعل</h3>
+                        <div class="stat-value">7.8%</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>3.2% عن الأسبوع الماضي</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-title">الوصول الكلي</h3>
+                        <div class="stat-value">125K</div>
+                        <div class="stat-change negative">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>2.1% عن الأسبوع الماضي</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">نظرة عامة على الأداء</h3>
+                        <select class="chart-select">
+                            <option>آخر 7 أيام</option>
+                            <option>آخر 30 يوم</option>
+                            <option>آخر 3 أشهر</option>
+                        </select>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">التوزيع حسب المنصة</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="platformChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Posts & Quick Actions -->
+            <div class="content-row">
+                <!-- Recent Posts -->
+                <div class="content-card wide">
+                    <div class="content-header">
+                        <h3 class="content-title">المنشورات القادمة</h3>
+                        <a href="posts.html" class="view-all-link">عرض الكل <i class="fas fa-arrow-left"></i></a>
+                    </div>
+                    <div class="content-body">
+                        <div class="posts-list">
+                            <div class="post-item">
+                                <div class="post-platforms">
+                                    <i class="fab fa-facebook facebook"></i>
+                                    <i class="fab fa-instagram instagram"></i>
+                                </div>
+                                <div class="post-content">
+                                    <h4 class="post-title">عرض خاص لعملائنا الكرام 🎉</h4>
+                                    <p class="post-excerpt">احصل على خصم 30% على جميع الخدمات لفترة محدودة...</p>
+                                </div>
+                                <div class="post-schedule">
+                                    <div class="post-date">
+                                        <i class="fas fa-clock"></i>
+                                        <span>اليوم، 6:00 مساءً</span>
+                                    </div>
+                                    <div class="post-status pending">قيد الانتظار</div>
+                                </div>
+                                <div class="post-actions">
+                                    <button class="action-btn" title="تعديل">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="post-item">
+                                <div class="post-platforms">
+                                    <i class="fab fa-twitter twitter"></i>
+                                    <i class="fab fa-linkedin linkedin"></i>
+                                </div>
+                                <div class="post-content">
+                                    <h4 class="post-title">نصائح للتسويق الرقمي الفعال</h4>
+                                    <p class="post-excerpt">إليك 5 نصائح مجربة لتحسين حملاتك التسويقية...</p>
+                                </div>
+                                <div class="post-schedule">
+                                    <div class="post-date">
+                                        <i class="fas fa-clock"></i>
+                                        <span>غداً، 10:00 صباحاً</span>
+                                    </div>
+                                    <div class="post-status scheduled">مجدول</div>
+                                </div>
+                                <div class="post-actions">
+                                    <button class="action-btn" title="تعديل">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="post-item">
+                                <div class="post-platforms">
+                                    <i class="fab fa-instagram instagram"></i>
+                                </div>
+                                <div class="post-content">
+                                    <h4 class="post-title">Behind the Scenes 📸</h4>
+                                    <p class="post-excerpt">لمحة من كواليس العمل في فريقنا الرائع...</p>
+                                </div>
+                                <div class="post-schedule">
+                                    <div class="post-date">
+                                        <i class="fas fa-clock"></i>
+                                        <span>25 نوفمبر، 3:00 مساءً</span>
+                                    </div>
+                                    <div class="post-status scheduled">مجدول</div>
+                                </div>
+                                <div class="post-actions">
+                                    <button class="action-btn" title="تعديل">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="content-card">
+                    <div class="content-header">
+                        <h3 class="content-title">إجراءات سريعة</h3>
+                    </div>
+                    <div class="content-body">
+                        <div class="quick-actions">
+                            <button class="quick-action-btn">
+                                <div class="quick-action-icon blue">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <span>منشور جديد</span>
+                            </button>
+
+                            <button class="quick-action-btn">
+                                <div class="quick-action-icon green">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <span>ربط حساب</span>
+                            </button>
+
+                            <button class="quick-action-btn">
+                                <div class="quick-action-icon purple">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <span>توليد محتوى بالذكاء الاصطناعي</span>
+                            </button>
+
+                            <button class="quick-action-btn">
+                                <div class="quick-action-icon orange">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <span>تقرير مفصل</span>
+                            </button>
+                        </div>
+
+                        <div class="tips-card">
+                            <div class="tips-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="tips-content">
+                                <h4>نصيحة اليوم</h4>
+                                <p>أفضل أوقات النشر على Instagram هي بين 10 صباحاً و 3 مساءً في أيام الأسبوع.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+==========================================
+  أوامر إصلاح خطأ 419 - نسخ ولصق
+==========================================
+
+الخطوة 1: افتح PowerShell أو Command Prompt
+
+الخطوة 2: شغل هذا الأمر للاتصال بالسيرفر:
+
+ssh -p 65002 u126213189@82.25.83.217
+
+الخطوة 3: أدخل كلمة المرور عند الطلب:
+
+gtWD8vyZBXT7qv$
+
+الخطوة 4: بعد الاتصال، انسخ والصق هذه الأوامر (كلها مرة واحدة):
+
+cd domains/mediaprosocial.io/public_html
+sed -i.backup 's/SESSION_ENCRYPT=true/SESSION_ENCRYPT=false/g' .env
+grep SESSION_ENCRYPT .env || echo 'SESSION_ENCRYPT=false' >> .env
+rm -f storage/framework/sessions/* 2>/dev/null
+find storage/framework/sessions -type f ! -name '.gitignore' -delete
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+echo ""
+echo "✅ تم الإصلاح بنجاح!"
+echo ""
+echo "الآن جرب تسجيل الدخول على:"
+echo "https://mediaprosocial.io/admin/login"
+echo "Email: admin@mediapro.com"
+echo "Password: Admin@12345"
+
+الخطوة 5: اكتب exit للخروج من SSH
+
+exit
+
+==========================================
+
+ملاحظات:
+- تأكد من نسخ الأوامر كاملة
+- إذا ظهرت رسالة "Permission denied"، جرب مرة أخرى
+- بعد التنفيذ، امسح كوكيز المتصفح وجرب تسجيل الدخول
+
+==========================================

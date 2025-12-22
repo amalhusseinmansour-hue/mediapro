@@ -1,0 +1,93 @@
+/* تحسينات للتصميم وإصلاح مشاكل Overflow */
+
+/* إصلاح overflow في الجداول */
+.fi-ta-table {
+    overflow-x: auto !important;
+}
+
+.fi-ta-table-container {
+    overflow-x: auto !important;
+    width: 100% !important;
+}
+
+/* تحسين عرض النصوص الطويلة */
+.fi-ta-text {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+}
+
+/* إصلاح عرض الأعمدة على الشاشات الصغيرة */
+@media (max-width: 768px) {
+    .fi-ta-table {
+        font-size: 0.85rem;
+    }
+
+    .fi-ta-cell {
+        padding: 0.5rem !important;
+    }
+
+    .fi-ta-header-cell {
+        padding: 0.5rem !important;
+    }
+}
+
+/* تحسين عرض الفورم على الشاشات الصغيرة */
+@media (max-width: 640px) {
+    .fi-fo-component-ctn {
+        max-width: 100% !important;
+    }
+}
+
+/* إصلاح عرض الصور */
+.fi-ta-image-column img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* تحسين عرض البادجز */
+.fi-badge {
+    word-break: keep-all !important;
+    white-space: nowrap !important;
+}
+
+/* إصلاح sidebar overflow */
+.fi-sidebar {
+    overflow-y: auto !important;
+    max-height: 100vh !important;
+}
+
+/* تحسين RTL للنصوص العربية */
+[dir="rtl"] .fi-ta-text {
+    text-align: right !important;
+}
+
+/* إصلاح عرض الإحصائيات */
+.fi-wi-stats-overview-stat {
+    overflow: hidden !important;
+}
+
+.fi-wi-stats-overview-stat-value {
+    word-break: break-all !important;
+}
+
+/* تحسين responsive للنماذج */
+.fi-fo-field-wrp {
+    width: 100% !important;
+}
+
+/* إصلاح عرض الأيقونات في الجداول */
+.fi-ta-icon-column {
+    text-align: center !important;
+}
+
+/* تحسين عرض الـ toggle columns button */
+.fi-ta-header-toolbar {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+}
+
+/* تحسين عرض الفلاتر */
+.fi-ta-filters {
+    overflow-x: auto !important;
+}

@@ -1,0 +1,12 @@
+# APK files
+*.apk
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
