@@ -20,48 +20,13 @@ workflows:
         script: |
           cd ios && pod install
 
-      - name: Flutter build iOS (no signing)
+      - name: Flutter build iOS
         script: |
           flutter build ios --release --no-codesign
 
     artifacts:
-      - build/ios/ipa/*.ipa
-      - build/ios/archive/*.xcarchive
+      - build/ios/iphoneos/*.app
       - /tmp/xcodebuild_logs/*.log
-
-    publishing:
-      email:
-        recipients:
-          - amalhusseinmansour@gmail.com
-        notify:
-          success: true
-          failure: true
-
-  android-workflow:
-    name: Android Release
-    max_build_duration: 60
-    instance_type: mac_mini_m2
-
-    environment:
-      android_signing:
-        - mediapro_keystore
-      vars:
-        BUNDLE_ID: "com.socialmedia.social_media_manager"
-      flutter: stable
-
-    scripts:
-      - name: Get Flutter packages
-        script: |
-          flutter pub get
-
-      - name: Build AAB
-        script: |
-          flutter build appbundle --release
-
-    artifacts:
-      - build/**/outputs/**/*.aab
-      - build/**/outputs/**/mapping.txt
-      - flutter_drive.log
 
     publishing:
       email:
