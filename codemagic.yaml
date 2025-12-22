@@ -1,22 +1,38 @@
 workflows:
   ios-release:
-    name: iOS Build
+    name: iOS Release
     max_build_duration: 120
     instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Codemagic
     environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.socialmedia.socialMediaManager
       flutter: stable
       xcode: 16.2
       cocoapods: default
+      vars:
+        APP_STORE_APPLE_ID: 6aborahmedhassan@gmail.com
     scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
       - name: Get packages
         script: flutter pub get
       - name: Pod install
         script: cd ios && pod install
       - name: Build iOS
-        script: flutter build ios --release --no-codesign
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
     artifacts:
-      - build/ios/iphoneos/*.app
+      - build/ios/ipa/*.ipa
     publishing:
       email:
         recipients:
           - amalhusseinmansour@gmail.com
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        expire_build_submitted_for_review: true
