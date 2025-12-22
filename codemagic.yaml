@@ -25,8 +25,8 @@ workflows:
       - name: Build iOS
         script: |
           flutter build ipa --release \
-            --build-number=$(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID") + 1)) \
-            --export-options-plist=/Users/builder/export_options.plist
+            --build-number=1 \
+            --export-options-plist=/Users/builder/export_options.plist 2>&1 | tee build_log.txt || (cat build_log.txt && exit 1)
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
