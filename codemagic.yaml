@@ -24,14 +24,15 @@ workflows:
         script: cd ios && pod install
       - name: Build iOS
         script: |
-          set -x
-          flutter build ios --release --no-codesign 2>&1 || true
-          cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -archivePath build/Runner.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO 2>&1 | grep -i "error:" || echo "No errors found"
-          cd ..
           flutter build ipa --release \
             --build-number=1 \
-            --export-options-plist=/Users/builder/export_options.plist
+            --export-options-plist=/Users/builder/export_options.plist 2>&1 | tee /tmp/build.log
+          BUILD_EXIT=$?
+          echo "======== ERRORS FOUND ========"
+          grep -i "error:" /tmp/build.log | head -20 || echo "No error: lines found"
+          echo "======== BUILD FAILED LINES ========"
+          grep -i "failed\|ARCHIVE FAILED" /tmp/build.log | head -10 || echo "No failed lines found"
+          exit $BUILD_EXIT
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
