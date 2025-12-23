@@ -10,7 +10,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.mediapro.socialmediamanager
       flutter: stable
-      xcode: 16.1
+      xcode: latest
       cocoapods: default
       vars:
         APP_STORE_APPLE_ID: 6aborahmedhassan@gmail.com
@@ -21,7 +21,10 @@ workflows:
       - name: Get packages
         script: flutter pub get
       - name: Pod install
-        script: cd ios && pod install
+        script: |
+          cd ios
+          rm -rf Pods Podfile.lock
+          pod install --repo-update
       - name: Build iOS
         script: |
           flutter build ipa --release \
