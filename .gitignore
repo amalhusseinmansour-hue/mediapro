@@ -47,14 +47,12 @@ app.*.map.json
 # Sensitive Files - DO NOT COMMIT
 # Firebase Configuration
 google-services.json
-firebase_options.dart
 GoogleService-Info.plist
 
 # API Keys & Secrets
 .env
 .env.local
 .env.production
-**/app_constants.dart
 lib/core/constants/api_keys.dart
 
 # Android Signing
