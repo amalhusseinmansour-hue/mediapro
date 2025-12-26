@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'dart:io' show Platform;
 import '../../core/constants/app_colors.dart';
 import '../../services/auth_service.dart';
 import 'register_screen_new.dart';
@@ -26,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen>
 
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _isAppleLoading = false;
 
   @override
   void initState() {
@@ -121,6 +123,62 @@ class _LoginScreenState extends State<LoginScreen>
         if (mounted) {
           setState(() => _isLoading = false);
         }
+      }
+    }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    setState(() => _isAppleLoading = true);
+    HapticFeedback.lightImpact();
+
+    try {
+      final success = await _authService.signInWithApple();
+
+      if (success) {
+        HapticFeedback.mediumImpact();
+        if (mounted) {
+          Get.offAll(() => const DashboardScreen());
+          Get.snackbar(
+            'مرحباً بك!',
+            'تم تسجيل الدخول بنجاح عبر Apple',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: const Color(0xFF00C853),
+            colorText: Colors.white,
+            margin: const EdgeInsets.all(16),
+            borderRadius: 12,
+            icon: const Icon(Icons.check_circle, color: Colors.white),
+          );
+        }
+      } else {
+        HapticFeedback.heavyImpact();
+        if (mounted) {
+          Get.snackbar(
+            'تم الإلغاء',
+            'تم إلغاء تسجيل الدخول عبر Apple',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: const Color(0xFFFF9800),
+            colorText: Colors.white,
+            margin: const EdgeInsets.all(16),
+            borderRadius: 12,
+          );
+        }
+      }
+    } catch (e) {
+      HapticFeedback.heavyImpact();
+      if (mounted) {
+        Get.snackbar(
+          'خطأ',
+          'حدث خطأ أثناء تسجيل الدخول عبر Apple',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: const Color(0xFFFF5252),
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          borderRadius: 12,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isAppleLoading = false);
       }
     }
   }
@@ -373,8 +431,107 @@ class _LoginScreenState extends State<LoginScreen>
               isLoading: _isLoading,
               text: 'تسجيل الدخول',
             ),
+
+            // Apple Sign In Button (iOS only)
+            if (Platform.isIOS) ...[
+              const SizedBox(height: 16),
+              _buildDivider(),
+              const SizedBox(height: 16),
+              _buildAppleSignInButton(),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 1,
+            color: Colors.white.withOpacity(0.2),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'أو',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 14,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            height: 1,
+            color: Colors.white.withOpacity(0.2),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAppleSignInButton() {
+    return Container(
+      height: 58,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: _isAppleLoading ? null : _handleAppleSignIn,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: _isAppleLoading
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.black,
+                  strokeWidth: 2.5,
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.network(
+                    'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg',
+                    height: 24,
+                    width: 24,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.apple,
+                      color: Colors.black,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'تسجيل الدخول بـ Apple',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }

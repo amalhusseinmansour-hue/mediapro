@@ -8,6 +8,9 @@ import 'api_service.dart';
 import 'shared_preferences_service.dart';
 import 'app_events_tracker.dart';
 import 'dart:io' show Platform;
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class AuthService extends GetxController {
   static const String _userBoxName = 'userBox';
@@ -525,6 +528,167 @@ class AuthService extends GetxController {
       isLoading.value = false;
       return false;
     }
+  }
+
+  // Login with Apple ID
+  Future<bool> signInWithApple() async {
+    try {
+      isLoading.value = true;
+      print('🍎 Starting Apple Sign In...');
+
+      // Generate nonce for security
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+
+      // Request Apple Sign In
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+
+      print('✅ Apple Sign In successful');
+      print('📧 Email: ${credential.email}');
+      print('👤 Name: ${credential.givenName} ${credential.familyName}');
+
+      // Extract user info
+      final email = credential.email ?? '';
+      final firstName = credential.givenName ?? '';
+      final lastName = credential.familyName ?? '';
+      final fullName = '$firstName $lastName'.trim();
+      final appleUserId = credential.userIdentifier ?? const Uuid().v4();
+
+      // Send to backend for authentication
+      try {
+        final response = await _apiService.post(
+          '/auth/social-login',
+          data: {
+            'provider': 'apple',
+            'provider_id': appleUserId,
+            'email': email,
+            'name': fullName.isNotEmpty ? fullName : 'Apple User',
+            'identity_token': credential.identityToken,
+            'authorization_code': credential.authorizationCode,
+          },
+        );
+
+        final tokenData = response['data']?['access_token'] ??
+            response['data']?['token'] ??
+            response['token'];
+        final userData =
+            (response['data']?['user'] ?? response['user']) as Map<String, dynamic>?;
+
+        if (response['success'] == true && tokenData != null) {
+          final token = tokenData as String;
+          await _apiService.setAuthToken(token);
+
+          final user = UserModel(
+            id: userData?['id']?.toString() ?? appleUserId,
+            name: userData?['name'] ?? fullName,
+            email: userData?['email'] ?? email,
+            phoneNumber: userData?['phone_number'] ?? '',
+            subscriptionType: userData?['subscription_type'] ?? 'free',
+            subscriptionStartDate: DateTime.now(),
+            subscriptionEndDate: DateTime.now().add(const Duration(days: 30)),
+            subscriptionTier: userData?['subscription_tier'] ?? 'free',
+            userType: userData?['user_type'] ?? 'individual',
+            isLoggedIn: true,
+            isActive: true,
+            isPhoneVerified: false,
+            photoUrl: userData?['photo_url'],
+            lastLogin: DateTime.now(),
+            createdAt: DateTime.now(),
+          );
+
+          // Save to Hive
+          final box = await _userBox;
+          await box.put(_currentUserKey, user);
+          currentUser.value = user;
+          isAuthenticated.value = true;
+
+          // Save to SharedPreferences
+          await _prefsService.saveUserData(
+            userId: user.id,
+            token: token,
+            email: user.email,
+            name: user.name,
+            phone: user.phoneNumber,
+          );
+
+          // Save login history
+          await _saveLoginHistory(
+            userId: user.id,
+            loginMethod: 'apple',
+            isSuccessful: true,
+          );
+
+          print('✅ Apple Sign In completed successfully');
+          isLoading.value = false;
+          return true;
+        }
+      } catch (apiError) {
+        print('⚠️ Backend unavailable, saving Apple user locally: $apiError');
+      }
+
+      // Fallback: Save locally if backend fails
+      final user = UserModel(
+        id: appleUserId,
+        name: fullName.isNotEmpty ? fullName : 'Apple User',
+        email: email,
+        phoneNumber: '',
+        subscriptionType: 'free',
+        subscriptionStartDate: DateTime.now(),
+        subscriptionEndDate: DateTime.now().add(const Duration(days: 30)),
+        subscriptionTier: 'free',
+        userType: 'individual',
+        isLoggedIn: true,
+        isActive: true,
+        isPhoneVerified: false,
+        lastLogin: DateTime.now(),
+        createdAt: DateTime.now(),
+      );
+
+      final box = await _userBox;
+      await box.put(_currentUserKey, user);
+      currentUser.value = user;
+      isAuthenticated.value = true;
+
+      await _prefsService.saveUserData(
+        userId: user.id,
+        token: 'apple_${DateTime.now().millisecondsSinceEpoch}',
+        email: user.email,
+        name: user.name,
+        phone: '',
+      );
+
+      print('✅ Apple user saved locally');
+      isLoading.value = false;
+      return true;
+    } on SignInWithAppleAuthorizationException catch (e) {
+      print('❌ Apple Sign In cancelled or failed: ${e.code} - ${e.message}');
+      isLoading.value = false;
+      return false;
+    } catch (e) {
+      print('❌ Apple Sign In error: $e');
+      isLoading.value = false;
+      return false;
+    }
+  }
+
+  // Generate random nonce for Apple Sign In
+  String _generateNonce([int length = 32]) {
+    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = List.generate(length, (i) => charset.codeUnitAt(DateTime.now().microsecondsSinceEpoch % charset.length));
+    return String.fromCharCodes(random);
+  }
+
+  // SHA256 hash for nonce
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
   }
 
   // Login with phone number via Backend API

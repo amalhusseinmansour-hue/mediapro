@@ -73,8 +73,9 @@ dependencies:
   # Social Media OAuth
   flutter_facebook_auth: ^6.0.4
   twitter_login: ^4.4.2
-  # sign_in_with_apple: ^5.0.0  # معطل مؤقتاً بسبب مشاكل التوافق
+  sign_in_with_apple: ^6.1.3
   google_sign_in: ^6.2.1
+  crypto: ^3.0.6
 
   # AI Integration
   chat_gpt_sdk: ^2.2.5
