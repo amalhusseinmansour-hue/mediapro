@@ -313,6 +313,7 @@ class AuthService extends GetxController {
     required String userType,
     String? companyName,
     int? employeeCount,
+    String? name,
   }) async {
     try {
       isLoading.value = true;
@@ -322,7 +323,7 @@ class AuthService extends GetxController {
         final response = await _apiService.post(
           '/auth/register',
           data: {
-            'name': 'User ${phoneNumber.substring(phoneNumber.length - 4)}',
+            'name': name ?? 'User ${phoneNumber.substring(phoneNumber.length - 4)}',
             'email': email,
             'password': password,
             'password_confirmation': password,

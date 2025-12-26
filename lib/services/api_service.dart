@@ -683,7 +683,7 @@ class ApiService {
       if (response['success'] == true) {
         // Clear local auth token after account deletion
         await clearAuthToken();
-        await SharedPreferencesService.clear();
+        await SharedPreferencesService().clearUserData();
       }
 
       return response;
