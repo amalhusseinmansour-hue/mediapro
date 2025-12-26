@@ -5,6 +5,7 @@ import '../../models/social_account_model.dart';
 import '../../models/user_model.dart';
 import '../../services/auth_service.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/config/feature_flags.dart';
 import '../subscription/subscription_screen.dart';
 
 class SocialAccountsManagementScreen extends StatefulWidget {
@@ -240,7 +241,8 @@ class _SocialAccountsManagementScreenState
                   ],
                 ),
               ),
-              if (!user.isBusinessTier) ...[
+              // Hide upgrade button on iOS for App Store approval
+              if (!user.isBusinessTier && FeatureFlags.showUpgradePrompts) ...[
                 const SizedBox(height: 8),
                 TextButton.icon(
                   onPressed: () => Get.to(() => const SubscriptionScreen()),
@@ -706,7 +708,8 @@ class _SocialAccountsManagementScreenState
             onPressed: () => Get.back(),
             child: const Text('إلغاء', style: TextStyle(color: Colors.white54)),
           ),
-          if (!user.isBusinessTier)
+          // Hide upgrade button on iOS for App Store approval
+          if (!user.isBusinessTier && FeatureFlags.showUpgradePrompts)
             ElevatedButton.icon(
               onPressed: () {
                 Get.back();

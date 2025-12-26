@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_icons.dart';
+import '../../core/config/feature_flags.dart';
 import '../../core/utils/dependency_helper.dart';
 
 import '../../services/notification_service.dart';
@@ -784,16 +785,18 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen>
                         badgeCount: _dashboardController.pendingAdsCount.value,
                         onTap: () => Get.to(() => const SponsoredAdsListScreen()),
                       ),
-                      _buildQuickActionCard(
-                        title: 'خطط الاشتراك',
-                        icon: AppIcons.premium,
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFFD700), Color(0xFFFF8C00)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                      // Hide subscription card on iOS for App Store approval
+                      if (FeatureFlags.showSubscriptions)
+                        _buildQuickActionCard(
+                          title: 'خطط الاشتراك',
+                          icon: AppIcons.premium,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFFD700), Color(0xFFFF8C00)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          onTap: () => Get.to(() => const SubscriptionScreen()),
                         ),
-                        onTap: () => Get.to(() => const SubscriptionScreen()),
-                      ),
                     ],
                   );
                 }),

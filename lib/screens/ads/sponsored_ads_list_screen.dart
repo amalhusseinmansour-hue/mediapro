@@ -295,60 +295,55 @@ class _SponsoredAdsListScreenState extends State<SponsoredAdsListScreen> with Si
   }
 
   Widget _buildStatsSection() {
-    return Column(
-      children: [
-        Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTablet = constraints.maxWidth > 600;
+        final crossAxisCount = isTablet ? 4 : 2;
+        final childAspectRatio = isTablet ? 1.3 : 1.1;
+
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: childAspectRatio,
           children: [
-            Expanded(
-              child: _buildModernStatCard(
-                title: 'الميزانية الكلية',
-                value: '\$${_adsService.totalBudget.toStringAsFixed(0)}',
-                gradient: LinearGradient(
-                  colors: [AppColors.neonCyan, AppColors.neonCyan.withValues(alpha:0.6)],
-                ),
-                icon: Icons.account_balance_wallet_rounded,
+            _buildModernStatCard(
+              title: 'الميزانية الكلية',
+              value: '\$${_adsService.totalBudget.toStringAsFixed(0)}',
+              gradient: LinearGradient(
+                colors: [AppColors.neonCyan, AppColors.neonCyan.withValues(alpha:0.6)],
               ),
+              icon: Icons.account_balance_wallet_rounded,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildModernStatCard(
-                title: 'نشطة',
-                value: _adsService.activeAdsCount.toString(),
-                gradient: LinearGradient(
-                  colors: [const Color(0xFF00E676), const Color(0xFF00E676).withValues(alpha:0.6)],
-                ),
-                icon: Icons.play_circle_filled_rounded,
+            _buildModernStatCard(
+              title: 'نشطة',
+              value: _adsService.activeAdsCount.toString(),
+              gradient: LinearGradient(
+                colors: [const Color(0xFF00E676), const Color(0xFF00E676).withValues(alpha:0.6)],
               ),
+              icon: Icons.play_circle_filled_rounded,
+            ),
+            _buildModernStatCard(
+              title: 'معلقة',
+              value: _adsService.pendingAdsCount.toString(),
+              gradient: LinearGradient(
+                colors: [const Color(0xFFFF9800), const Color(0xFFFF9800).withValues(alpha:0.6)],
+              ),
+              icon: Icons.schedule_rounded,
+            ),
+            _buildModernStatCard(
+              title: 'مكتملة',
+              value: _adsService.completedAdsCount.toString(),
+              gradient: LinearGradient(
+                colors: [AppColors.neonPurple, AppColors.neonPurple.withValues(alpha:0.6)],
+              ),
+              icon: Icons.verified_rounded,
             ),
           ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildModernStatCard(
-                title: 'معلقة',
-                value: _adsService.pendingAdsCount.toString(),
-                gradient: LinearGradient(
-                  colors: [const Color(0xFFFF9800), const Color(0xFFFF9800).withValues(alpha:0.6)],
-                ),
-                icon: Icons.schedule_rounded,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildModernStatCard(
-                title: 'مكتملة',
-                value: _adsService.completedAdsCount.toString(),
-                gradient: LinearGradient(
-                  colors: [AppColors.neonPurple, AppColors.neonPurple.withValues(alpha:0.6)],
-                ),
-                icon: Icons.verified_rounded,
-              ),
-            ),
-          ],
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -358,76 +353,74 @@ class _SponsoredAdsListScreenState extends State<SponsoredAdsListScreen> with Si
     required Gradient gradient,
     required IconData icon,
   }) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isSmall = constraints.maxWidth < 100;
-        return Container(
-          padding: EdgeInsets.all(isSmall ? 12 : 16),
-          decoration: BoxDecoration(
-            color: AppColors.darkCard,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.1),
-              width: 1,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.darkCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: gradient.colors.first.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: gradient.colors.first.withValues(alpha: 0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: gradient,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: gradient.colors.first.withValues(alpha: 0.4),
+                  blurRadius: 15,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            child: Icon(icon, color: Colors.white, size: 26),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: EdgeInsets.all(isSmall ? 8 : 12),
-                decoration: BoxDecoration(
-                  gradient: gradient,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: gradient.colors.first.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Icon(icon, color: Colors.white, size: isSmall ? 20 : 24),
+          const SizedBox(height: 14),
+          ShaderMask(
+            shaderCallback: (bounds) => gradient.createShader(bounds),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-              SizedBox(height: isSmall ? 8 : 12),
-              Flexible(
-                child: ShaderMask(
-                  shaderCallback: (bounds) => gradient.createShader(bounds),
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: isSmall ? 20 : 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: isSmall ? 10 : 12,
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        );
-      },
+          const SizedBox(height: 6),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
@@ -436,327 +429,355 @@ class _SponsoredAdsListScreenState extends State<SponsoredAdsListScreen> with Si
     final progress = ad.status == AdStatus.active ? 0.65 :
                      ad.status == AdStatus.completed ? 1.0 : 0.0;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.darkCard,
-            AppColors.darkCard.withValues(alpha:0.8),
-          ],
-        ),
-        border: Border.all(
-          color: statusColor.withValues(alpha:0.3),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: statusColor.withValues(alpha:0.1),
-            blurRadius: 20,
-            spreadRadius: 0,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha:0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Get.to(
-              () => AdDetailsScreen(ad: ad),
-              transition: Transition.rightToLeft,
-              duration: const Duration(milliseconds: 300),
-            );
-          },
-          borderRadius: BorderRadius.circular(24),
-          child: Stack(
-            children: [
-              // Progress bar at top
-              if (progress > 0)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 4,
-                      backgroundColor: Colors.white.withValues(alpha:0.05),
-                      valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-                    ),
-                  ),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 350;
+        final isMediumScreen = constraints.maxWidth < 450;
 
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header with status and budget
-                    Row(
+        return Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.darkCard,
+                AppColors.darkCard.withValues(alpha:0.8),
+              ],
+            ),
+            border: Border.all(
+              color: statusColor.withValues(alpha:0.3),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: statusColor.withValues(alpha:0.1),
+                blurRadius: 20,
+                spreadRadius: 0,
+                offset: const Offset(0, 8),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha:0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Get.to(
+                  () => AdDetailsScreen(ad: ad),
+                  transition: Transition.rightToLeft,
+                  duration: const Duration(milliseconds: 300),
+                );
+              },
+              borderRadius: BorderRadius.circular(24),
+              child: Stack(
+                children: [
+                  // Progress bar at top
+                  if (progress > 0)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          minHeight: 4,
+                          backgroundColor: Colors.white.withValues(alpha:0.05),
+                          valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                        ),
+                      ),
+                    ),
+
+                  Padding(
+                    padding: EdgeInsets.all(isSmallScreen ? 16 : 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Status Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                statusColor.withValues(alpha:0.3),
-                                statusColor.withValues(alpha:0.1),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: statusColor.withValues(alpha:0.5),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: statusColor,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: statusColor.withValues(alpha:0.5),
-                                      blurRadius: 6,
-                                      spreadRadius: 1,
-                                    ),
+                        // Header with status and budget - responsive wrap
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            // Status Badge
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isSmallScreen ? 10 : 14,
+                                vertical: isSmallScreen ? 6 : 8,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    statusColor.withValues(alpha:0.3),
+                                    statusColor.withValues(alpha:0.1),
                                   ],
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                ad.statusText,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: statusColor,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: statusColor.withValues(alpha:0.5),
+                                  width: 1,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        // Ad Type Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.neonPurple.withValues(alpha:0.2),
-                                AppColors.neonPurple.withValues(alpha:0.1),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            ad.adTypeText,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.neonPurple,
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        // Budget with icon
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            gradient: AppColors.cyanPurpleGradient.scale(0.3),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: AppColors.neonCyan.withValues(alpha:0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.payments_rounded,
-                                color: AppColors.neonCyan,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                '\$${ad.budget.toStringAsFixed(0)}',
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.neonCyan,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Title with gradient
-                    ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [Colors.white, Colors.white.withValues(alpha:0.8)],
-                      ).createShader(bounds),
-                      child: Text(
-                        ad.title,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          height: 1.3,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // Description
-                    Text(
-                      ad.description,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                        height: 1.5,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Platform icons and time
-                    Row(
-                      children: [
-                        // Platforms
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha:0.05),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha:0.1),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Wrap(
-                                spacing: 6,
-                                children: ad.platforms
-                                    .take(4)
-                                    .map((platform) => _buildEnhancedPlatformIcon(platform))
-                                    .toList(),
-                              ),
-                              if (ad.platforms.length > 4) ...[
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    gradient: AppColors.cyanPurpleGradient.scale(0.3),
-                                    borderRadius: BorderRadius.circular(8),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: statusColor,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: statusColor.withValues(alpha:0.5),
+                                          blurRadius: 6,
+                                          spreadRadius: 1,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  child: Text(
-                                    '+${ad.platforms.length - 4}',
-                                    style: const TextStyle(
-                                      fontSize: 11,
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    ad.statusText,
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 11 : 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: statusColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Ad Type Badge
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isSmallScreen ? 10 : 12,
+                                vertical: isSmallScreen ? 6 : 8,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.neonPurple.withValues(alpha:0.2),
+                                    AppColors.neonPurple.withValues(alpha:0.1),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                ad.adTypeText,
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 10 : 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.neonPurple,
+                                ),
+                              ),
+                            ),
+                            // Budget with icon
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isSmallScreen ? 10 : 12,
+                                vertical: isSmallScreen ? 6 : 8,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: AppColors.cyanPurpleGradient.scale(0.3),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.neonCyan.withValues(alpha:0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.payments_rounded,
+                                    color: AppColors.neonCyan,
+                                    size: isSmallScreen ? 14 : 16,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '\$${ad.budget.toStringAsFixed(0)}',
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 13 : 15,
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.neonCyan,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: isSmallScreen ? 12 : 16),
+
+                        // Title with gradient
+                        ShaderMask(
+                          shaderCallback: (bounds) => LinearGradient(
+                            colors: [Colors.white, Colors.white.withValues(alpha:0.8)],
+                          ).createShader(bounds),
+                          child: Text(
+                            ad.title,
+                            style: TextStyle(
+                              fontSize: isSmallScreen ? 17 : (isMediumScreen ? 18 : 20),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              height: 1.3,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
 
-                        const Spacer(),
+                        SizedBox(height: isSmallScreen ? 8 : 10),
 
-                        // Time ago
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha:0.05),
-                            borderRadius: BorderRadius.circular(12),
+                        // Description
+                        Text(
+                          ad.description,
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 12 : 14,
+                            color: AppColors.textSecondary,
+                            height: 1.5,
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.schedule_rounded,
-                                size: 16,
-                                color: AppColors.textSecondary.withValues(alpha:0.8),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        SizedBox(height: isSmallScreen ? 12 : 16),
+
+                        // Platform icons and time - responsive
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          alignment: WrapAlignment.spaceBetween,
+                          children: [
+                            // Platforms
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isSmallScreen ? 10 : 12,
+                                vertical: isSmallScreen ? 6 : 8,
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                _getTimeAgo(ad.createdAt),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary.withValues(alpha:0.8),
-                                  fontWeight: FontWeight.w500,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha:0.05),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha:0.1),
+                                  width: 1,
                                 ),
                               ),
-                            ],
-                          ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Wrap(
+                                    spacing: isSmallScreen ? 4 : 6,
+                                    children: ad.platforms
+                                        .take(isSmallScreen ? 3 : 4)
+                                        .map((platform) => _buildEnhancedPlatformIcon(platform, isSmallScreen))
+                                        .toList(),
+                                  ),
+                                  if (ad.platforms.length > (isSmallScreen ? 3 : 4)) ...[
+                                    SizedBox(width: isSmallScreen ? 4 : 6),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: isSmallScreen ? 6 : 8,
+                                        vertical: isSmallScreen ? 3 : 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: AppColors.cyanPurpleGradient.scale(0.3),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        '+${ad.platforms.length - (isSmallScreen ? 3 : 4)}',
+                                        style: TextStyle(
+                                          fontSize: isSmallScreen ? 10 : 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.neonCyan,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+
+                            // Time ago
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: isSmallScreen ? 10 : 12,
+                                vertical: isSmallScreen ? 6 : 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha:0.05),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.schedule_rounded,
+                                    size: isSmallScreen ? 14 : 16,
+                                    color: AppColors.textSecondary.withValues(alpha:0.8),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _getTimeAgo(ad.createdAt),
+                                    style: TextStyle(
+                                      fontSize: isSmallScreen ? 10 : 12,
+                                      color: AppColors.textSecondary.withValues(alpha:0.8),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-
-              // Shimmer effect for active ads
-              if (ad.status == AdStatus.active)
-                Positioned.fill(
-                  child: AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment(-1 + _animationController.value * 2, 0),
-                              end: Alignment(1 + _animationController.value * 2, 0),
-                              colors: [
-                                Colors.transparent,
-                                Colors.white.withValues(alpha:0.03),
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
                   ),
-                ),
-            ],
+
+                  // Shimmer effect for active ads
+                  if (ad.status == AdStatus.active)
+                    Positioned.fill(
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(24),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment(-1 + _animationController.value * 2, 0),
+                                  end: Alignment(1 + _animationController.value * 2, 0),
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.white.withValues(alpha:0.03),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildEnhancedPlatformIcon(AdPlatform platform) {
+  Widget _buildEnhancedPlatformIcon(AdPlatform platform, [bool isSmallScreen = false]) {
     IconData icon = Icons.public;
     Color color = AppColors.neonCyan;
 
@@ -788,7 +809,7 @@ class _SponsoredAdsListScreenState extends State<SponsoredAdsListScreen> with Si
     }
 
     return Container(
-      padding: const EdgeInsets.all(6),
+      padding: EdgeInsets.all(isSmallScreen ? 5 : 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha:0.15),
         borderRadius: BorderRadius.circular(8),
@@ -797,7 +818,7 @@ class _SponsoredAdsListScreenState extends State<SponsoredAdsListScreen> with Si
           width: 1,
         ),
       ),
-      child: Icon(icon, color: color, size: 18),
+      child: Icon(icon, color: color, size: isSmallScreen ? 14 : 18),
     );
   }
 

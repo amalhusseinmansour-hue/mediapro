@@ -667,6 +667,35 @@ class ApiService {
     };
   }
 
+  /// Delete user account permanently
+  /// Required by Apple App Store (Guideline 5.1.1)
+  Future<Map<String, dynamic>> deleteAccount({
+    String? password,
+    String? reason,
+  }) async {
+    try {
+      final response = await _http.post('/user/delete-account', body: {
+        if (password != null) 'password': password,
+        if (reason != null) 'reason': reason,
+        'confirm_deletion': true,
+      });
+
+      if (response['success'] == true) {
+        // Clear local auth token after account deletion
+        await clearAuthToken();
+        await SharedPreferencesService.clear();
+      }
+
+      return response;
+    } catch (e) {
+      print('❌ Delete account failed: $e');
+      return {
+        'success': false,
+        'message': 'فشل حذف الحساب. يرجى المحاولة مرة أخرى.',
+      };
+    }
+  }
+
   // ========== Generic HTTP Methods ==========
 
   /// GET Request

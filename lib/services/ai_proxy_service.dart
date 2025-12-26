@@ -1,16 +1,10 @@
-import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import '../core/config/env_config.dart';
 import 'http_service.dart';
 
-/// خدمة AI Proxy - تتصل بـ Cloudflare Worker
+/// خدمة AI Proxy - تتصل بـ Backend API مباشرة
 /// توفر Rate Limiting و Caching تلقائياً
 class AIProxyService extends GetxService {
-  // رابط الـ Cloudflare Worker
-  static const String _proxyUrl = 'https://mediapro-ai-proxy.YOUR_SUBDOMAIN.workers.dev';
-
-  // استخدام Backend كـ fallback
+  // استخدام Backend مباشرة
   HttpService? get _httpService {
     try {
       return Get.find<HttpService>();
@@ -22,7 +16,7 @@ class AIProxyService extends GetxService {
   final RxBool isLoading = false.obs;
   final RxString lastError = ''.obs;
   final RxInt remainingRequests = (-1).obs;
-  final RxString currentProvider = 'proxy'.obs;
+  final RxString currentProvider = 'backend'.obs;
 
   // إحصائيات الاستخدام
   final RxMap<String, dynamic> usageStats = <String, dynamic>{}.obs;
@@ -30,12 +24,11 @@ class AIProxyService extends GetxService {
   @override
   void onInit() {
     super.onInit();
-    print('🤖 AI Proxy Service initialized');
-    print('📡 Proxy URL: $_proxyUrl');
+    print('🤖 AI Service initialized - using Backend API');
     _loadUsage();
   }
 
-  /// توليد محتوى باستخدام AI Proxy
+  /// توليد محتوى باستخدام Backend AI
   Future<String> generateContent({
     required String prompt,
     String type = 'content', // content, hashtags, ideas, improve
@@ -46,34 +39,38 @@ class AIProxyService extends GetxService {
     try {
       isLoading.value = true;
       lastError.value = '';
+      currentProvider.value = 'backend';
 
-      // محاولة استخدام Proxy أولاً
-      final result = await _callProxy(
-        endpoint: '/api/generate',
+      if (_httpService == null) {
+        throw Exception('خدمة HTTP غير متاحة');
+      }
+
+      // استخدام Backend مباشرة
+      final response = await _httpService!.post(
+        '/ai/generate',
         body: {
           'prompt': prompt,
           'type': type,
           'platform': platform,
           'language': language,
           'tone': tone,
-          'userId': await _getUserId(),
-          'subscriptionTier': await _getSubscriptionTier(),
         },
       );
 
-      if (result['success'] == true) {
-        currentProvider.value = result['provider'] ?? 'proxy';
-        if (result['usage'] != null) {
-          remainingRequests.value = result['usage']['remaining'] ?? -1;
+      if (response['success'] == true) {
+        final data = response['data'];
+        if (data != null) {
+          return data['content'] ?? data['optimized_content'] ?? data['text'] ?? prompt;
         }
-        return result['content'];
+        return response['content'] ?? prompt;
       }
 
-      // إذا فشل Proxy، استخدم Backend مباشرة
+      // Fallback: محاولة endpoint آخر
       return await _fallbackToBackend(prompt, type, platform, language, tone);
 
     } catch (e) {
       lastError.value = e.toString();
+      print('❌ AI generation error: $e');
       // Fallback to backend
       return await _fallbackToBackend(prompt, type, platform, language, tone);
     } finally {
@@ -193,18 +190,14 @@ $content
   /// الحصول على إحصائيات الاستخدام
   Future<Map<String, dynamic>> getUsage() async {
     try {
-      final userId = await _getUserId();
-      final tier = await _getSubscriptionTier();
+      if (_httpService == null) return {};
 
-      final response = await http.get(
-        Uri.parse('$_proxyUrl/api/usage?userId=$userId&tier=$tier'),
-        headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: 10));
+      final response = await _httpService!.get('/ai/usage');
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        usageStats.value = data;
-        remainingRequests.value = data['remaining'] ?? -1;
+      if (response['success'] == true) {
+        final data = response['data'] ?? response;
+        usageStats.value = Map<String, dynamic>.from(data);
+        remainingRequests.value = data['remaining'] ?? data['requests_remaining'] ?? -1;
         return data;
       }
     } catch (e) {
@@ -212,32 +205,6 @@ $content
     }
 
     return {};
-  }
-
-  /// استدعاء الـ Proxy
-  Future<Map<String, dynamic>> _callProxy({
-    required String endpoint,
-    required Map<String, dynamic> body,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$_proxyUrl$endpoint'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(body),
-      ).timeout(const Duration(seconds: 60));
-
-      final data = json.decode(response.body);
-
-      if (response.statusCode == 429) {
-        // Rate limit exceeded
-        throw Exception(data['message_ar'] ?? 'تم تجاوز الحد المسموح');
-      }
-
-      return data;
-    } catch (e) {
-      print('⚠️ Proxy call failed: $e');
-      rethrow;
-    }
   }
 
   /// Fallback إلى Backend

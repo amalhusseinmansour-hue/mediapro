@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/config/feature_flags.dart';
 import '../../core/controllers/theme_controller.dart';
 import '../../core/controllers/locale_controller.dart';
 import '../../services/auth_service_temp.dart' as auth_temp;
@@ -194,32 +195,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
             const SizedBox(height: 8),
-            _buildSettingCard(
-              icon: Icons.credit_card,
-              title: 'الاشتراك',
-              subtitle: 'إدارة خطة الاشتراك',
-              badge: 'أفراد',
-              badgeColor: AppColors.primaryPurple,
-              onTap: () {
-                // TODO: Navigate to subscription management
-              },
-            ),
-            const SizedBox(height: 8),
-            _buildSettingCard(
-              icon: Icons.account_balance_wallet_rounded,
-              title: 'المحفظة الإلكترونية',
-              subtitle: 'إدارة رصيدك والمعاملات',
-              onTap: () {
-                Get.to(() => const WalletScreen());
-              },
-            ),
-            const SizedBox(height: 8),
+            // Hide subscription on iOS for App Store approval
+            if (FeatureFlags.showSubscriptions) ...[
+              _buildSettingCard(
+                icon: Icons.credit_card,
+                title: 'الاشتراك',
+                subtitle: 'إدارة خطة الاشتراك',
+                badge: 'أفراد',
+                badgeColor: AppColors.primaryPurple,
+                onTap: () {
+                  // TODO: Navigate to subscription management
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+            // Hide wallet on iOS for App Store approval
+            if (FeatureFlags.showWallet) ...[
+              _buildSettingCard(
+                icon: Icons.account_balance_wallet_rounded,
+                title: 'المحفظة الإلكترونية',
+                subtitle: 'إدارة رصيدك والمعاملات',
+                onTap: () {
+                  Get.to(() => const WalletScreen());
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
             _buildSettingCard(
               icon: Icons.lock,
               title: 'الأمان',
               subtitle: 'تغيير كلمة المرور والأمان',
               onTap: () {
                 _showSecurityDialog();
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildSettingCard(
+              icon: Icons.delete_forever,
+              title: 'حذف الحساب',
+              subtitle: 'حذف حسابك وجميع بياناتك نهائياً',
+              onTap: () {
+                _showDeleteAccountDialog();
               },
             ),
             const SizedBox(height: 8),
@@ -1666,6 +1682,193 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
                   : const Text('حفظ'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog() {
+    String? selectedReason;
+    final reasons = [
+      'لم أعد بحاجة للتطبيق',
+      'وجدت بديلاً أفضل',
+      'مشاكل تقنية',
+      'مخاوف تتعلق بالخصوصية',
+      'أسباب أخرى',
+    ];
+    bool isDeleting = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.warning_rounded, color: Colors.red, size: 28),
+              const SizedBox(width: 8),
+              const Text('حذف الحساب'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '⚠️ تحذير هام',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                          fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'سيؤدي حذف حسابك إلى:',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(height: 4),
+                      Text('• حذف جميع بياناتك الشخصية نهائياً'),
+                      Text('• حذف جميع المنشورات المجدولة'),
+                      Text('• إلغاء ربط جميع حسابات السوشال ميديا'),
+                      Text('• إلغاء الاشتراك الحالي'),
+                      SizedBox(height: 8),
+                      Text(
+                        'هذا الإجراء لا يمكن التراجع عنه!',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'لماذا تريد حذف حسابك؟ (اختياري)',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                ...reasons.map((reason) => RadioListTile<String>(
+                  value: reason,
+                  groupValue: selectedReason,
+                  onChanged: (value) {
+                    setDialogState(() {
+                      selectedReason = value;
+                    });
+                  },
+                  title: Text(reason, style: const TextStyle(fontSize: 14)),
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                )),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isDeleting ? null : () => Navigator.pop(context),
+              child: const Text('إلغاء'),
+            ),
+            ElevatedButton(
+              onPressed: isDeleting
+                  ? null
+                  : () async {
+                      // Show second confirmation
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('تأكيد الحذف النهائي'),
+                          content: const Text(
+                            'هل أنت متأكد تماماً من رغبتك في حذف حسابك؟\n\n'
+                            'اكتب "حذف" للتأكيد.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('لا، تراجع'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                              ),
+                              child: const Text('نعم، احذف حسابي'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirmed != true) return;
+
+                      setDialogState(() => isDeleting = true);
+
+                      try {
+                        final response = await _apiService?.deleteAccount(
+                          reason: selectedReason,
+                        );
+
+                        if (response?['success'] == true) {
+                          Navigator.pop(context);
+
+                          // Clear all local data and go to login
+                          await _authService.signOut();
+
+                          Get.offAll(() => const LoginScreen());
+
+                          Get.snackbar(
+                            'تم حذف الحساب',
+                            'تم حذف حسابك وجميع بياناتك بنجاح',
+                            backgroundColor: Colors.green,
+                            colorText: Colors.white,
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        } else {
+                          Get.snackbar(
+                            'خطأ',
+                            response?['message'] ?? 'فشل حذف الحساب',
+                            backgroundColor: AppColors.error,
+                            colorText: Colors.white,
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
+                      } catch (e) {
+                        Get.snackbar(
+                          'خطأ',
+                          'حدث خطأ أثناء حذف الحساب: $e',
+                          backgroundColor: AppColors.error,
+                          colorText: Colors.white,
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      } finally {
+                        setDialogState(() => isDeleting = false);
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
+              child: isDeleting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('حذف حسابي نهائياً'),
             ),
           ],
         ),

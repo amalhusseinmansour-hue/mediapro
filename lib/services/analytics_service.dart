@@ -9,6 +9,7 @@ import 'package:hive/hive.dart';
 import '../models/analytics_history_model.dart';
 import 'social_accounts_service.dart';
 import 'auth_service.dart';
+import 'api_service.dart';
 
 class AnalyticsService extends GetxService {
   final Dio _dio = Dio(
@@ -20,6 +21,14 @@ class AnalyticsService extends GetxService {
   );
 
   final AuthService _authService = Get.find<AuthService>();
+
+  ApiService? get _apiService {
+    try {
+      return Get.find<ApiService>();
+    } catch (e) {
+      return null;
+    }
+  }
 
   // Observable data
   final Rx<UsageStats?> usageStats = Rx<UsageStats?>(null);
@@ -70,17 +79,22 @@ class AnalyticsService extends GetxService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          // Add auth token
-          final token = _authService.currentUser.value?.id;
-          if (token != null) {
+          // Add auth token from ApiService
+          final token = _apiService?.authToken;
+          if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
+            print('📊 Analytics request with token: ${token.substring(0, 20)}...');
+          } else {
+            print('⚠️ Analytics request without token');
           }
           options.headers['Accept'] = 'application/json';
           options.headers['Content-Type'] = 'application/json';
           return handler.next(options);
         },
         onError: (error, handler) {
-          print('Analytics API Error: ${error.message}');
+          print('❌ Analytics API Error: ${error.message}');
+          print('❌ Status Code: ${error.response?.statusCode}');
+          print('❌ Response: ${error.response?.data}');
           return handler.next(error);
         },
       ),
@@ -477,10 +491,10 @@ class AnalyticsService extends GetxService {
         final f = account.stats?.followers ?? 0;
         final p = account.stats?.postsCount ?? 0;
         final e = account.stats?.engagementRate ?? 0.0;
-        final platform = account.platform?.toString().toLowerCase() ?? 'other';
+        final platform = account.platform.toString().toLowerCase() ?? 'other';
 
-        final followers = f is int ? f : (f as num).toInt();
-        final posts = p is int ? p : (p as num).toInt();
+        final followers = f;
+        final posts = p;
 
         totalFollowers += followers;
         totalPosts += posts;

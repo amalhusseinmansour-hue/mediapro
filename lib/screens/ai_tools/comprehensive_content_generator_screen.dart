@@ -260,7 +260,7 @@ class _ComprehensiveContentGeneratorScreenState extends State<ComprehensiveConte
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          value: _selectedLanguage,
+                          initialValue: _selectedLanguage,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -301,7 +301,7 @@ class _ComprehensiveContentGeneratorScreenState extends State<ComprehensiveConte
                         ),
                         const SizedBox(height: 8),
                         DropdownButtonFormField<String>(
-                          value: _selectedTone,
+                          initialValue: _selectedTone,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),

@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/advanced_ai_content_service.dart';
+import '../../services/ai_proxy_service.dart';
+import '../../services/http_service.dart';
 import 'dart:math';
 
 class AIChatbotScreen extends StatefulWidget {
@@ -21,6 +23,8 @@ class _AIChatbotScreenState extends State<AIChatbotScreen>
   late AnimationController _typingAnimationController;
 
   AdvancedAIContentService? _aiService;
+  AIProxyService? _proxyService;
+  HttpService? _httpService;
 
   final List<String> _quickPrompts = [
     'اقترح أفكار محتوى',
@@ -47,6 +51,12 @@ class _AIChatbotScreenState extends State<AIChatbotScreen>
     try {
       if (Get.isRegistered<AdvancedAIContentService>()) {
         _aiService = Get.find<AdvancedAIContentService>();
+      }
+      if (Get.isRegistered<AIProxyService>()) {
+        _proxyService = Get.find<AIProxyService>();
+      }
+      if (Get.isRegistered<HttpService>()) {
+        _httpService = Get.find<HttpService>();
       }
     } catch (e) {
       print('AI Service not available: $e');
@@ -445,28 +455,75 @@ class _AIChatbotScreenState extends State<AIChatbotScreen>
   }
 
   Future<void> _generateAIResponse(String userMessage) async {
-    await Future.delayed(const Duration(milliseconds: 1500));
-
     String response;
 
-    // Generate contextual responses based on user message
-    if (userMessage.contains('أفكار') || userMessage.contains('اقترح')) {
-      response = _generateContentIdeas();
-    } else if (userMessage.contains('Instagram') ||
-        userMessage.contains('انستجرام')) {
-      response = _generateInstagramPost();
-    } else if (userMessage.contains('تغريدة') || userMessage.contains('Twitter')) {
-      response = _generateTweet();
-    } else if (userMessage.contains('هاشتاق') || userMessage.contains('hashtag')) {
-      response = _generateHashtags();
-    } else if (userMessage.contains('تحسين') || userMessage.contains('حسن')) {
-      response = _generateImprovement(userMessage);
-    } else if (userMessage.contains('ترجم')) {
-      response = _generateTranslation(userMessage);
-    } else {
-      response = _generateGenericResponse(userMessage);
-    }
+    try {
+      // Try using backend AI first
+      if (_httpService != null) {
+        final apiResponse = await _httpService!.post(
+          '/ai/chat',
+          body: {
+            'message': userMessage,
+            'context': 'social_media_assistant',
+            'language': 'ar',
+          },
+        );
 
+        if (apiResponse['success'] == true && apiResponse['data'] != null) {
+          response = apiResponse['data']['response'] ??
+                     apiResponse['data']['content'] ??
+                     apiResponse['data']['message'] ?? '';
+          if (response.isNotEmpty) {
+            _addAIResponse(response);
+            return;
+          }
+        }
+      }
+
+      // Try using AI Proxy Service
+      if (_proxyService != null) {
+        final type = _detectContentType(userMessage);
+        final platform = _detectPlatform(userMessage);
+
+        response = await _proxyService!.generateContent(
+          prompt: userMessage,
+          type: type,
+          platform: platform,
+          language: 'ar',
+        );
+
+        if (response.isNotEmpty && response != userMessage) {
+          _addAIResponse(response);
+          return;
+        }
+      }
+
+      // Try using Advanced AI Content Service
+      if (_aiService != null) {
+        response = await _aiService!.generateContent(
+          topic: userMessage,
+          contentType: 'post',
+        );
+
+        if (response.isNotEmpty) {
+          _addAIResponse(response);
+          return;
+        }
+      }
+
+      // Fallback to local responses
+      response = _generateLocalResponse(userMessage);
+      _addAIResponse(response);
+
+    } catch (e) {
+      print('❌ AI Chat Error: $e');
+      // Fallback to local responses on error
+      response = _generateLocalResponse(userMessage);
+      _addAIResponse(response);
+    }
+  }
+
+  void _addAIResponse(String response) {
     setState(() {
       _isTyping = false;
       _messages.add(ChatMessage(
@@ -475,8 +532,55 @@ class _AIChatbotScreenState extends State<AIChatbotScreen>
         timestamp: DateTime.now(),
       ));
     });
-
     _scrollToBottom();
+  }
+
+  String _detectContentType(String message) {
+    if (message.contains('أفكار') || message.contains('اقترح')) {
+      return 'ideas';
+    } else if (message.contains('هاشتاق') || message.contains('hashtag')) {
+      return 'hashtags';
+    } else if (message.contains('تحسين') || message.contains('حسن')) {
+      return 'improve';
+    } else if (message.contains('ترجم')) {
+      return 'translate';
+    }
+    return 'content';
+  }
+
+  String _detectPlatform(String message) {
+    if (message.contains('Instagram') || message.contains('انستجرام')) {
+      return 'instagram';
+    } else if (message.contains('تغريدة') || message.contains('Twitter') || message.contains('تويتر')) {
+      return 'twitter';
+    } else if (message.contains('Facebook') || message.contains('فيسبوك')) {
+      return 'facebook';
+    } else if (message.contains('LinkedIn') || message.contains('لينكدإن')) {
+      return 'linkedin';
+    } else if (message.contains('TikTok') || message.contains('تيك توك')) {
+      return 'tiktok';
+    }
+    return 'general';
+  }
+
+  String _generateLocalResponse(String userMessage) {
+    // Generate contextual responses based on user message
+    if (userMessage.contains('أفكار') || userMessage.contains('اقترح')) {
+      return _generateContentIdeas();
+    } else if (userMessage.contains('Instagram') ||
+        userMessage.contains('انستجرام')) {
+      return _generateInstagramPost();
+    } else if (userMessage.contains('تغريدة') || userMessage.contains('Twitter')) {
+      return _generateTweet();
+    } else if (userMessage.contains('هاشتاق') || userMessage.contains('hashtag')) {
+      return _generateHashtags();
+    } else if (userMessage.contains('تحسين') || userMessage.contains('حسن')) {
+      return _generateImprovement(userMessage);
+    } else if (userMessage.contains('ترجم')) {
+      return _generateTranslation(userMessage);
+    } else {
+      return _generateGenericResponse(userMessage);
+    }
   }
 
   String _generateContentIdeas() {

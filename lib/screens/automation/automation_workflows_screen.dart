@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import '../../services/laravel_api_service.dart';
 import '../../services/n8n_workflow_service.dart';
 import '../../models/user_model.dart';
+import '../../core/config/feature_flags.dart';
 import '../subscription/subscription_screen.dart';
 
 /// شاشة إدارة سيناريوهات الأتمتة (N8N Workflows) مع قيود الاشتراكات
@@ -133,21 +134,25 @@ class _AutomationWorkflowsScreenState extends State<AutomationWorkflowsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('ترقية الاشتراك'),
-        content: const Text(
-          'ميزة الأتمتة متاحة فقط للمشتركين في الباقات المدفوعة.\n\nقم بالترقية للاستمتاع بهذه الميزة القوية!',
+        content: Text(
+          FeatureFlags.showUpgradePrompts
+              ? 'ميزة الأتمتة متاحة فقط للمشتركين في الباقات المدفوعة.\n\nقم بالترقية للاستمتاع بهذه الميزة القوية!'
+              : 'ميزة الأتمتة متاحة فقط للمشتركين في الباقات المدفوعة.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: const Text('حسناً'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Get.to(() => const SubscriptionScreen());
-            },
-            child: const Text('ترقية الآن'),
-          ),
+          // Hide upgrade button on iOS for App Store approval
+          if (FeatureFlags.showUpgradePrompts)
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Get.to(() => const SubscriptionScreen());
+              },
+              child: const Text('ترقية الآن'),
+            ),
         ],
       ),
     );
@@ -159,15 +164,17 @@ class _AutomationWorkflowsScreenState extends State<AutomationWorkflowsScreen> {
       builder: (context) => AlertDialog(
         title: const Text('وصلت للحد الأقصى'),
         content: Text(
-          'لقد وصلت للحد الأقصى من سيناريوهات الأتمتة (${user.maxAutomationWorkflows}) في باقة ${user.tierDisplayName}.\n\n'
-          'قم بالترقية لباقة أعلى للحصول على المزيد من السيناريوهات!',
+          FeatureFlags.showUpgradePrompts
+              ? 'لقد وصلت للحد الأقصى من سيناريوهات الأتمتة (${user.maxAutomationWorkflows}) في باقة ${user.tierDisplayName}.\n\nقم بالترقية لباقة أعلى للحصول على المزيد من السيناريوهات!'
+              : 'لقد وصلت للحد الأقصى من سيناريوهات الأتمتة (${user.maxAutomationWorkflows}) في باقتك الحالية.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: const Text('حسناً'),
           ),
-          if (!user.isBusinessTier)
+          // Hide upgrade button on iOS for App Store approval
+          if (!user.isBusinessTier && FeatureFlags.showUpgradePrompts)
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -325,13 +332,16 @@ class _AutomationWorkflowsScreenState extends State<AutomationWorkflowsScreen> {
                   ? (isUnlimited
                       ? 'يمكنك إنشاء سيناريوهات أتمتة غير محدودة'
                       : 'يمكنك إنشاء حتى ${user.maxAutomationWorkflows} ${user.maxAutomationWorkflows == 1 ? 'سيناريو' : 'سيناريوهات'}')
-                  : 'قم بالترقية لباقة مدفوعة لاستخدام الأتمتة',
+                  : (FeatureFlags.showUpgradePrompts
+                      ? 'قم بالترقية لباقة مدفوعة لاستخدام الأتمتة'
+                      : 'ميزة الأتمتة متاحة في الباقات المدفوعة'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.grey.shade700,
               ),
             ),
-            if (!user.canUseAutomation) ...[
+            // Hide upgrade button on iOS for App Store approval
+            if (!user.canUseAutomation && FeatureFlags.showUpgradePrompts) ...[
               const SizedBox(height: 12),
               ElevatedButton.icon(
                 onPressed: () => Get.to(() => const SubscriptionScreen()),
