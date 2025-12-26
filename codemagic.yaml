@@ -28,7 +28,7 @@ workflows:
       - name: Build iOS
         script: |
           flutter build ipa --release \
-            --build-number=1 \
+            --build-number=$PROJECT_BUILD_NUMBER \
             --export-options-plist=/Users/builder/export_options.plist 2>&1 | tee /tmp/build.log
           BUILD_EXIT=$?
           echo "======== ERRORS FOUND ========"
